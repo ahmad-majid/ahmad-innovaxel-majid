@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
 
+import urlRoutes from './routes/urlRoutes.js';
 
 dotenv.config();
 
@@ -11,6 +12,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Routes
+app.use('/shorten', urlRoutes);
 
 const PORT = process.env.PORT || 5000;
 
