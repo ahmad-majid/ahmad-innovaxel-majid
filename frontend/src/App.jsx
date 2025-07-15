@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import './index.css';
 
 function App() {
   const [longUrl, setLongUrl] = useState('');
@@ -31,7 +32,7 @@ function App() {
 
     try {
       const res = await axios.post(`${API}`, { url: longUrl });
-      setShortUrl(`${API}/${res.data.shortCode}`);
+      setShortUrl(`http://localhost:5000/${res.data.shortCode}`);
       setLongUrl('');
       fetchUrls();
     } catch (err) {
@@ -52,6 +53,7 @@ function App() {
 
   const handleDelete = async (code) => {
     if (!window.confirm('Are you sure you want to delete this URL?')) return;
+
     try {
       await axios.delete(`${API}/${code}`);
       fetchUrls();
@@ -61,88 +63,85 @@ function App() {
   };
 
   return (
-    <div style={{ padding: '20px' }}>
-      <h1>URL Shortener</h1>
+    <div className="container">
+      <h1 className="title">🔗 URL Shortener</h1>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="form">
         <input
           type="text"
           value={longUrl}
           onChange={(e) => setLongUrl(e.target.value)}
-          placeholder="Enter long URL"
+          placeholder="Paste a long URL here"
           required
-          style={{ padding: '8px', width: '300px' }}
+          className="input"
         />
-        <button type="submit" style={{ padding: '8px 16px', marginLeft: '10px' }}>
-          Shorten
-        </button>
+        <button type="submit" className="submit-btn">Shorten</button>
       </form>
 
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {error && <p className="error">{error}</p>}
       {shortUrl && (
-        <p>
+        <p className="short-url">
           Short URL: <a href={shortUrl} target="_blank" rel="noreferrer">{shortUrl}</a>
         </p>
       )}
 
-      <h2 style={{ marginTop: '40px' }}>All URLs</h2>
+      <h2 style={{ marginTop: '40px' }}>📋 Your Shortened URLs</h2>
       {urls.length === 0 ? (
         <p>No URLs found.</p>
       ) : (
-        <table border="1" cellPadding="10" style={{ marginTop: '10px' }}>
-          <thead>
-            <tr>
-              <th>Short Code</th>
-              <th>Original URL</th>
-              <th>Access Count</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {urls.map((u) => (
-              <tr key={u._id}>
-                <td>
-                  <a href={`${API}/${u.shortCode}`} target="_blank" rel="noreferrer">
-                    {u.shortCode}
-                  </a>
-                </td>
-                <td>
-                  {editCode === u.shortCode ? (
-                    <>
-                      <input
-                        type="text"
-                        value={newUrl}
-                        onChange={(e) => setNewUrl(e.target.value)}
-                        style={{ width: '300px' }}
-                      />
-                      <button onClick={() => handleUpdate(u.shortCode)}>Save</button>
-                      <button onClick={() => setEditCode(null)}>Cancel</button>
-                    </>
-                  ) : (
-                    u.url
-                  )}
-                </td>
-                <td>{u.accessCount}</td>
-                <td>
-                  {editCode !== u.shortCode && (
-                    <>
-                      <button
-                        onClick={() => {
-                          setEditCode(u.shortCode);
-                          setNewUrl(u.url);
-                        }}
-                        style={{ marginRight: '8px' }}
-                      >
-                        Edit
-                      </button>
-                      <button onClick={() => handleDelete(u.shortCode)}>Delete</button>
-                    </>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div className="card-list">
+          {urls.map((u) => (
+            <div key={u._id} className="card">
+              <div>
+                <strong>Short:</strong>{' '}
+                <a href={`http://localhost:5000/${u.shortCode}`} target="_blank" rel="noreferrer">
+                  {u.shortCode}
+                </a>
+              </div>
+
+              <div style={{ marginTop: '6px' }}>
+                <strong>Original:</strong>{' '}
+                {editCode === u.shortCode ? (
+                  <>
+                    <input
+                      type="text"
+                      value={newUrl}
+                      onChange={(e) => setNewUrl(e.target.value)}
+                      className="edit-input"
+                    />
+                    <div style={{ marginTop: '10px' }}>
+                      <button onClick={() => handleUpdate(u.shortCode)} className="save-btn">Save</button>
+                      <button onClick={() => setEditCode(null)} className="cancel-btn">Cancel</button>
+                    </div>
+                  </>
+                ) : (
+                  <span className="url-text">{u.url}</span>
+                )}
+              </div>
+
+              <div style={{ marginTop: '10px' }}>
+                <strong>Accessed:</strong> {u.accessCount} times
+              </div>
+
+              {editCode !== u.shortCode && (
+                <div className="btn-group">
+                  <button
+                    onClick={() => {
+                      setEditCode(u.shortCode);
+                      setNewUrl(u.url);
+                    }}
+                    className="edit-btn"
+                  >
+                    Edit
+                  </button>
+                  <button onClick={() => handleDelete(u.shortCode)} className="delete-btn">
+                    Delete
+                  </button>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
       )}
     </div>
   );

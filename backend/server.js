@@ -4,6 +4,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 
 import urlRoutes from './routes/urlRoutes.js';
+import { getOriginalUrl } from './controllers/urlController.js';
 
 dotenv.config();
 
@@ -14,7 +15,9 @@ app.use(cors());
 app.use(express.json());
 
 // ✅ Mount routes at root to enable short redirects like /FW9a9J
-app.use('/', urlRoutes);
+app.use('/shorten', urlRoutes);
+app.get('/:code', getOriginalUrl); // for redirection
+
 
 const PORT = process.env.PORT || 5000;
 
