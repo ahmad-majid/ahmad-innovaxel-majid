@@ -6,12 +6,14 @@ function App() {
   const [shortUrl, setShortUrl] = useState('');
   const [error, setError] = useState('');
   const [urls, setUrls] = useState([]);
+  const [editCode, setEditCode] = useState(null);
+  const [newUrl, setNewUrl] = useState('');
 
-  const API = 'http://localhost:5000';
+  const API = 'http://localhost:5000/shorten';
 
   const fetchUrls = async () => {
     try {
-      const res = await axios.get(`${API}`);
+      const res = await axios.get(`${API}/`);
       setUrls(res.data);
     } catch (err) {
       console.error('Error fetching URLs:', err);
@@ -34,6 +36,17 @@ function App() {
       fetchUrls();
     } catch (err) {
       setError(err.response?.data?.error || 'An error occurred');
+    }
+  };
+
+  const handleUpdate = async (code) => {
+    try {
+      await axios.put(`${API}/${code}`, { url: newUrl });
+      setEditCode(null);
+      setNewUrl('');
+      fetchUrls();
+    } catch (err) {
+      alert('Update failed');
     }
   };
 
@@ -71,6 +84,7 @@ function App() {
             <tr>
               <th>Short Code</th>
               <th>Original URL</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -81,7 +95,34 @@ function App() {
                     {u.shortCode}
                   </a>
                 </td>
-                <td>{u.url}</td>
+                <td>
+                  {editCode === u.shortCode ? (
+                    <>
+                      <input
+                        type="text"
+                        value={newUrl}
+                        onChange={(e) => setNewUrl(e.target.value)}
+                        style={{ width: '300px' }}
+                      />
+                      <button onClick={() => handleUpdate(u.shortCode)}>Save</button>
+                      <button onClick={() => setEditCode(null)}>Cancel</button>
+                    </>
+                  ) : (
+                    u.url
+                  )}
+                </td>
+                <td>
+                  {editCode !== u.shortCode && (
+                    <button
+                      onClick={() => {
+                        setEditCode(u.shortCode);
+                        setNewUrl(u.url);
+                      }}
+                    >
+                      Edit
+                    </button>
+                  )}
+                </td>
               </tr>
             ))}
           </tbody>
