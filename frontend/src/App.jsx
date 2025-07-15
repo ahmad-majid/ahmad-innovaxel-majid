@@ -31,7 +31,7 @@ function App() {
 
     try {
       const res = await axios.post(`${API}`, { url: longUrl });
-      setShortUrl(`http://localhost:5000/${res.data.shortCode}`);
+      setShortUrl(`${API}/${res.data.shortCode}`);
       setLongUrl('');
       fetchUrls();
     } catch (err) {
@@ -52,7 +52,6 @@ function App() {
 
   const handleDelete = async (code) => {
     if (!window.confirm('Are you sure you want to delete this URL?')) return;
-
     try {
       await axios.delete(`${API}/${code}`);
       fetchUrls();
@@ -95,6 +94,7 @@ function App() {
             <tr>
               <th>Short Code</th>
               <th>Original URL</th>
+              <th>Access Count</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -102,7 +102,7 @@ function App() {
             {urls.map((u) => (
               <tr key={u._id}>
                 <td>
-                  <a href={`http://localhost:5000/${u.shortCode}`} target="_blank" rel="noreferrer">
+                  <a href={`${API}/${u.shortCode}`} target="_blank" rel="noreferrer">
                     {u.shortCode}
                   </a>
                 </td>
@@ -122,6 +122,7 @@ function App() {
                     u.url
                   )}
                 </td>
+                <td>{u.accessCount}</td>
                 <td>
                   {editCode !== u.shortCode && (
                     <>
@@ -130,13 +131,11 @@ function App() {
                           setEditCode(u.shortCode);
                           setNewUrl(u.url);
                         }}
-                        style={{ marginRight: '5px' }}
+                        style={{ marginRight: '8px' }}
                       >
                         Edit
                       </button>
-                      <button onClick={() => handleDelete(u.shortCode)} style={{ color: 'red' }}>
-                        Delete
-                      </button>
+                      <button onClick={() => handleDelete(u.shortCode)}>Delete</button>
                     </>
                   )}
                 </td>
