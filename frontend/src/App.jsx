@@ -1,5 +1,11 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import {
+  getAllUrls,
+  createShortUrl,
+  updateUrl,
+  deleteUrl
+} from './api';
+import UrlCard from './components/UrlCard';
 import './index.css';
 
 function App() {
@@ -10,12 +16,10 @@ function App() {
   const [editCode, setEditCode] = useState(null);
   const [newUrl, setNewUrl] = useState('');
 
-  const API = 'http://localhost:5000/shorten';
-
   const fetchUrls = async () => {
     try {
-      const res = await axios.get(`${API}/`);
-      setUrls(res.data);
+      const data = await getAllUrls();
+      setUrls(data);
     } catch (err) {
       console.error('Error fetching URLs:', err);
     }
@@ -31,8 +35,8 @@ function App() {
     setShortUrl('');
 
     try {
-      const res = await axios.post(`${API}`, { url: longUrl });
-      setShortUrl(`http://localhost:5000/${res.data.shortCode}`);
+      const data = await createShortUrl(longUrl);
+      setShortUrl(`http://localhost:5000/${data.shortCode}`);
       setLongUrl('');
       fetchUrls();
     } catch (err) {
@@ -42,24 +46,26 @@ function App() {
 
   const handleUpdate = async (code) => {
     try {
-      await axios.put(`${API}/${code}`, { url: newUrl });
+      await updateUrl(code, newUrl);
       setEditCode(null);
       setNewUrl('');
       fetchUrls();
-    } catch (err) {
-      alert('Update failed');
-    }
+  } catch (err) {
+  console.error(err);
+  alert('Update failed');
+}
   };
 
   const handleDelete = async (code) => {
     if (!window.confirm('Are you sure you want to delete this URL?')) return;
 
     try {
-      await axios.delete(`${API}/${code}`);
+      await deleteUrl(code);
       fetchUrls();
-    } catch (err) {
-      alert('Delete failed');
-    }
+   } catch (err) {
+  console.error(err);
+  alert('Update failed');
+}
   };
 
   return (
@@ -91,55 +97,16 @@ function App() {
       ) : (
         <div className="card-list">
           {urls.map((u) => (
-            <div key={u._id} className="card">
-              <div>
-                <strong>Short:</strong>{' '}
-                <a href={`http://localhost:5000/${u.shortCode}`} target="_blank" rel="noreferrer">
-                  {u.shortCode}
-                </a>
-              </div>
-
-              <div style={{ marginTop: '6px' }}>
-                <strong>Original:</strong>{' '}
-                {editCode === u.shortCode ? (
-                  <>
-                    <input
-                      type="text"
-                      value={newUrl}
-                      onChange={(e) => setNewUrl(e.target.value)}
-                      className="edit-input"
-                    />
-                    <div style={{ marginTop: '10px' }}>
-                      <button onClick={() => handleUpdate(u.shortCode)} className="save-btn">Save</button>
-                      <button onClick={() => setEditCode(null)} className="cancel-btn">Cancel</button>
-                    </div>
-                  </>
-                ) : (
-                  <span className="url-text">{u.url}</span>
-                )}
-              </div>
-
-              <div style={{ marginTop: '10px' }}>
-                <strong>Accessed:</strong> {u.accessCount} times
-              </div>
-
-              {editCode !== u.shortCode && (
-                <div className="btn-group">
-                  <button
-                    onClick={() => {
-                      setEditCode(u.shortCode);
-                      setNewUrl(u.url);
-                    }}
-                    className="edit-btn"
-                  >
-                    Edit
-                  </button>
-                  <button onClick={() => handleDelete(u.shortCode)} className="delete-btn">
-                    Delete
-                  </button>
-                </div>
-              )}
-            </div>
+            <UrlCard
+              key={u._id}
+              u={u}
+              editCode={editCode}
+              setEditCode={setEditCode}
+              newUrl={newUrl}
+              setNewUrl={setNewUrl}
+              handleUpdate={handleUpdate}
+              handleDelete={handleDelete}
+            />
           ))}
         </div>
       )}
