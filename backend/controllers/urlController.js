@@ -58,3 +58,29 @@ export const getOriginalUrl = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+// Update existing short URL
+export const updateUrl = async (req, res) => {
+  const { code } = req.params;
+  const { url } = req.body;
+
+  if (!url || !validUrl.isWebUri(url)) {
+    return res.status(400).json({ error: 'Invalid or missing URL' });
+  }
+
+  try {
+    const updated = await Url.findOneAndUpdate(
+      { shortCode: code },
+      { url, updatedAt: new Date() },
+      { new: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({ error: 'Short URL not found' });
+    }
+
+    res.status(200).json(updated);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
