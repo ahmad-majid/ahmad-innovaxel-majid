@@ -53,12 +53,13 @@ export const getOriginalUrl = async (req, res) => {
     urlDoc.accessCount++;
     await urlDoc.save();
 
-    // ✅ Fix here
-    res.redirect(encodeURI(urlDoc.url));
+    // ✅ Redirect to the long URL
+    return res.redirect(encodeURI(urlDoc.url));
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
+
 
 
 // Update existing short URL
