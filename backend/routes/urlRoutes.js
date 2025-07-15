@@ -9,10 +9,11 @@ import {
 
 const router = express.Router();
 
-router.get('/', getAllUrls);  
-router.get('/:code', getOriginalUrl);
+// ✅ 
 router.post('/', createShortUrl);
+router.get('/', getAllUrls);
 router.put('/:code', updateUrl);
-router.delete('/:code', deleteUrl
-);
+router.delete('/:code', deleteUrl);
+router.get('/:code', getOriginalUrl);
+
 export default router;

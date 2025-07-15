@@ -9,14 +9,16 @@ dotenv.config();
 
 const app = express();
 
+// Middleware
 app.use(cors());
 app.use(express.json());
 
-// Routes
-app.use('/shorten', urlRoutes);
+// ✅ Mount routes at root to enable short redirects like /FW9a9J
+app.use('/', urlRoutes);
 
 const PORT = process.env.PORT || 5000;
 
+// Connect to MongoDB and start the server
 mongoose.connect(process.env.MONGO_URI)
   .then(() => {
     console.log('Connected to MongoDB');

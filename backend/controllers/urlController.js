@@ -1,12 +1,12 @@
-import Url from '../models/Url.js';
-import generateShortCode from '../utils/generateShortCode.js';
-import validUrl from 'valid-url';
+import Url from "../models/Url.js";
+import generateShortCode from "../utils/generateShortCode.js";
+import validUrl from "valid-url";
 
 // Create short URL
 export const createShortUrl = async (req, res) => {
   const { url } = req.body;
   if (!url || !validUrl.isWebUri(url)) {
-    return res.status(400).json({ error: 'Invalid or missing URL' });
+    return res.status(400).json({ error: "Invalid or missing URL" });
   }
 
   try {
@@ -40,24 +40,26 @@ export const getAllUrls = async (req, res) => {
   }
 };
 
-// Get original URL by short code
+// ✅ Updated: Redirect to original URL when accessed via shortCode
 export const getOriginalUrl = async (req, res) => {
   const { code } = req.params;
 
   try {
     const urlDoc = await Url.findOne({ shortCode: code });
     if (!urlDoc) {
-      return res.status(404).json({ error: 'Short URL not found' });
+      return res.status(404).json({ error: "Short URL not found" });
     }
 
     urlDoc.accessCount++;
     await urlDoc.save();
 
-    res.status(200).json(urlDoc);
+    // ✅ Fix here
+    res.redirect(encodeURI(urlDoc.url));
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
+
 
 // Update existing short URL
 export const updateUrl = async (req, res) => {
@@ -65,7 +67,7 @@ export const updateUrl = async (req, res) => {
   const { url } = req.body;
 
   if (!url || !validUrl.isWebUri(url)) {
-    return res.status(400).json({ error: 'Invalid or missing URL' });
+    return res.status(400).json({ error: "Invalid or missing URL" });
   }
 
   try {
@@ -76,7 +78,7 @@ export const updateUrl = async (req, res) => {
     );
 
     if (!updated) {
-      return res.status(404).json({ error: 'Short URL not found' });
+      return res.status(404).json({ error: "Short URL not found" });
     }
 
     res.status(200).json(updated);
@@ -84,6 +86,7 @@ export const updateUrl = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
 // Delete short URL
 export const deleteUrl = async (req, res) => {
   const { code } = req.params;
@@ -91,11 +94,10 @@ export const deleteUrl = async (req, res) => {
   try {
     const deleted = await Url.findOneAndDelete({ shortCode: code });
     if (!deleted) {
-      return res.status(404).json({ error: 'Short URL not found' });
+      return res.status(404).json({ error: "Short URL not found" });
     }
     res.status(204).send();
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
-
